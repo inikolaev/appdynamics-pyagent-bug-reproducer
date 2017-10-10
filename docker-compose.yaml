@@ -1,0 +1,27 @@
+version: '2.1'
+
+services:
+  db:
+    image: postgres:9.6-alpine
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "psql -h localhost -U postgres -c '\\l'"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  main:
+    build: .
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./src:/app/src
+    environment:
+      - MODE=${MODE:-pyagent}
+
